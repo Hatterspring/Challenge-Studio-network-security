@@ -1,0 +1,10 @@
+CORP - OT NETWORK REFERENCE (INTERNAL - DO NOT DISTRIBUTE)
+
+Jumpbox mgmt: jumpbox.ot-dmz.corp (10.20.20.5)
+PLC-1 (Unitronics sim): 10.30.30.11:20256  -- default creds: none set
+PLC-2 (Rockwell sim):   10.30.30.12:44818  -- EtherNet/IP, no auth
+HMI:                    10.30.30.20:80
+
+Vendor default reference sheet:
+  Unitronics Vision series -> factory default: no password
+  Rockwell CompactLogix    -> Studio 5000 session, no protocol-level auth

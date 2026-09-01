@@ -1,0 +1,15 @@
+#!/bin/bash
+apt-get update -qq
+apt-get install -y --no-install-recommends samba >/dev/null
+
+ip addr add 10.10.10.20/24 dev eth0 2>/dev/null || true
+
+ip link set eth1 down
+
+mkdir -p /srv/ot_docs
+cp /OT_Network_Diagram_and_Vendor_Defaults.txt /srv/ot_docs/
+chmod -R 777 /srv/ot_docs
+cp /smb.conf /etc/samba/smb.conf
+
+service smbd restart 2>/dev/null || smbd -D
+echo "[fileserver] guest-writable //fileserver/ot_docs share up"

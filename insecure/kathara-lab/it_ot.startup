@@ -1,0 +1,5 @@
+#!/bin/bash
+ip addr add 10.10.10.253/24 dev eth0 2>/dev/null || true  # it_lan
+ip addr add 10.20.20.254/24 dev eth1 2>/dev/null || true  # ot_dmz
+echo 1 > /proc/sys/net/ipv4/ip_forward
+echo "[rtr-it-ot] forwarding it_lan<->ot_dmz, no ACLs (Volt Typhoon's pivot path)"

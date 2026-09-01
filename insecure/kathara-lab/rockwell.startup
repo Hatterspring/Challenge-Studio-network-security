@@ -1,0 +1,23 @@
+#!/bin/bash
+apt-get update -qq
+apt-get install -y --no-install-recommends python3 dropbear iproute2 >/dev/null
+
+ip link set eth2 down
+
+ip addr add 10.30.30.12/24 dev eth0 2>/dev/null || true  # ot_lan
+ip addr add 172.16.0.12/24 dev eth1 2>/dev/null || true  # dmz (direct exposure)
+
+mkdir -p /state
+cp /project.ACD.txt /state/project.ACD.txt
+
+nohup python3 /rockwell_sim.py > /var/log/rockwell_sim.log 2>&1 &
+
+# Real dropbear, matching the advisory's observed persistence mechanism.
+# Left with a weak root password on purpose to demonstrate the "foothold
+# that survives reboot" step of the AA26-097A chain.
+echo "root:embedded123" | chpasswd
+mkdir -p /etc/dropbear
+dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key 2>/dev/null
+dropbear -p 22 -R
+
+echo "[plc-rockwell-sim] EtherNet/IP sim on :44818, dropbear SSH on :22 (root/embedded123)"

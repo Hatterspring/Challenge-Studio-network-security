@@ -1,0 +1,31 @@
+#!/bin/bash
+# Kathara runs Linux containers, so this is a Linux stand-in for the IT admin
+# workstation rather than literal Windows+PuTTY. If you want the exact
+# vssadmin/PuTTY-registry behaviour from the advisory, swap this node for a
+# licensed Windows VM bridged onto it_lan instead - everything else in the
+# topology is OS-agnostic.
+
+apt-get update -qq
+apt-get install -y --no-install-recommends xrdp openssh-client sshpass >/dev/null
+
+ip link set eth1 down
+
+ip addr add 10.10.10.30/24 dev eth0 2>/dev/null || true
+
+useradd -m -s /bin/bash corpadmin 2>/dev/null || true
+echo "corpadmin:Passw0rd!" | chpasswd
+
+# Stand-in for "saved PuTTY sessions" (T1552 / T1012 discovery target):
+# a plaintext file with stored OT jump-host connection profiles and creds.
+mkdir -p /home/corpadmin/.saved_sessions
+cat > /home/corpadmin/.saved_sessions/ot_jumpbox.session <<'EOF'
+HostName=jumpbox.ot-dmz.corp
+Port=22
+Username=otadmin
+# Vuln: password saved in cleartext session profile
+Password=Ch@ngeMe2026
+EOF
+chown -R corpadmin:corpadmin /home/corpadmin
+
+service xrdp start 2>/dev/null || xrdp
+echo "[admin-ws] up, RDP on :3389, stored OT session creds at ~/.saved_sessions/"

@@ -1,0 +1,11 @@
+#!/bin/bash
+apt-get update -qq
+apt-get install -y --no-install-recommends python3 iproute2 >/dev/null
+
+ip link set eth2 down
+
+ip addr add 10.30.30.11/24 dev eth0 2>/dev/null || true  # ot_lan
+ip addr add 172.16.0.11/24 dev eth1 2>/dev/null || true  # dmz (direct exposure)
+
+nohup python3 /unitronics_sim.py > /var/log/unitronics_sim.log 2>&1 &
+echo "[plc-unitronics-sim] up on :20256, reachable from dmz AND ot_lan"

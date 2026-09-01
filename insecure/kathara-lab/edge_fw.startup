@@ -1,0 +1,12 @@
+#!/bin/bash
+apt-get update -qq
+apt-get install -y --no-install-recommends python3 iproute2 >/dev/null
+
+ip addr add 10.0.0.1/24 dev eth0 2>/dev/null || true   # internet-facing
+ip addr add 172.16.0.1/24 dev eth1 2>/dev/null || true # dmz-facing
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+ip link set eth2 down
+
+nohup python3 /appliance.py > /var/log/appliance.log 2>&1 &
+echo "[edge-fw] vulnerable admin panel up on :8080 (try /admin?debug=1, /backup/config.bak)"

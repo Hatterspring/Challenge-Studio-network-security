@@ -1,0 +1,5 @@
+#!/bin/bash
+ip addr add 172.16.0.254/24 dev eth0 2>/dev/null || true  # dmz
+ip addr add 10.10.10.254/24 dev eth1 2>/dev/null || true  # it_lan
+echo 1 > /proc/sys/net/ipv4/ip_forward
+echo "[rtr-dmz-it] forwarding dmz<->it_lan, no ACLs (flat by design - stage 1 mitigation target)"

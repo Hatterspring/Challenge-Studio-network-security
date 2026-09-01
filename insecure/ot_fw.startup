@@ -1,7 +1,0 @@
-ip addr add 192.168.0.2/24 dev eth0
-ip link set up dev eth0
-ip addr add 192.168.210.1/24 dev eth1
-ip link set up dev eth1
-ip addr add 192.168.20.1/23 dev eth2
-ip link set up dev eth2
-ip route add default via 192.168.0.1

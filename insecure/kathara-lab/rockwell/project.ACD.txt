@@ -1,0 +1,14 @@
+-- STAND-IN .ACD PROJECT FILE (Studio 5000 Logix Designer export) --
+Controller: CompactLogix 5380, Rev 33.x
+Program: MainProgram
+  Routine: MainRoutine
+    Rung 0: XIC(Start_PB) OTE(Pump_Run)
+    Rung 1: GRT(Tank_Level, HighLevel_SP) OTE(Alarm_High_Level)
+    Rung 2: XIC(Alarm_High_Level) OTU(Pump_Run)
+Tags:
+  Tank_Level        : REAL
+  HighLevel_SP      : REAL = 90.0
+  Pump_Run          : BOOL
+  Alarm_High_Level  : BOOL
+  Chlorine_Dose_Rate: REAL = 3.2
+-- end of file --

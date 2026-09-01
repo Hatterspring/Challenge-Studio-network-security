@@ -1,0 +1,10 @@
+#!/bin/bash
+apt-get update -qq
+apt-get install -y --no-install-recommends python3 iproute2 >/dev/null
+
+ip link set eth1 down
+
+ip addr add 10.30.30.20/24 dev eth0 2>/dev/null || true
+
+nohup python3 /hmi_app.py > /var/log/hmi.log 2>&1 &
+echo "[hmi-scada] operator dashboard up on :80"

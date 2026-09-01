@@ -1,0 +1,26 @@
+#!/bin/bash
+# Stand-in for the vCenter/PRTG-style OT-adjacent management host Volt Typhoon
+# pivoted through. Reachable from it_lan via the credential stored on
+# admin-ws, and bridges through to ot_lan.
+
+apt-get update -qq
+apt-get install -y --no-install-recommends openssh-server socat iproute2 >/dev/null
+
+ip link set eth2 down
+
+ip addr add 10.20.20.5/24 dev eth0 2>/dev/null || true  # ot_dmz-facing
+ip addr add 10.30.30.5/24 dev eth1 2>/dev/null || true  # ot_lan-facing
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+useradd -m -s /bin/bash otadmin 2>/dev/null || true
+echo "otadmin:Ch@ngeMe2026" | chpasswd
+
+mkdir -p /run/sshd
+/usr/sbin/sshd
+
+# Optional demo of the netsh-portproxy-equivalent C2 relay technique
+# (T1090.001): forward a port on the OT-DMZ side straight through to the
+# HMI on ot_lan, so a compromised jumpbox becomes a covert relay.
+nohup socat TCP-LISTEN:8888,fork TCP:10.30.30.20:80 > /var/log/socat.log 2>&1 &
+
+echo "[jumpbox] SSH up (otadmin/Ch@ngeMe2026), relaying :8888 -> hmi-scada:80"
