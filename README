@@ -1,0 +1,5 @@
+This is a network penetration testing project designed to reflect three major historical attack chains. It consists of a vulnerable network where all three attack chains can be replicated, and a secure network where the threat of all focused attack chains are diminished or completely mitigated. 
+
+PLEASE NOTE: The insecure network was originally developed by claude AI, the source files of which can be found in kathara-vulnerable-lab.zip. This network has been modified in order to: 
+    a) function and 
+    b) reflect my own personal touch.
