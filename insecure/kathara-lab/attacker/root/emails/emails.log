@@ -1,0 +1,42 @@
+NEW EMAIL
+FROM <vtstudent@vtschool.mail.com>
+TO <netassistant@otsolutions.mail.net>
+DATETIME 29/09/2026 11:54:32
+CONTENT
+    "Dear Network Assistant of Operational Technology Solutions,
+
+    I hope this email finds you well.
+    I am a dedicated networking student who is developing a Challenge Studio project for my school. My project 
+    focuses on combining Operational Technology with Information Technology and I was really interested to see
+    how that could work. I was wondering if you could possibly give me a rundown of your network structure for
+    some inspiration for my own project? I'm especially interested in linking a small-scale industrial machine,
+    like a pump, to a wider Information Technology Network. 
+
+    Kind Regards,
+
+    Alicia Smith
+    Student"
+END MAIL
+
+NEW EMAIL
+FROM <netassistant@otsolutions.mail.net>
+TO <vtstudent@vtschool.mail.com>
+DATETIME 30/09/2026 14:23:54
+ATTACHMENTS: ot_solutions_net_diagram.png
+CONTENT
+    "Hi Alicia,
+    
+    That seems like a reasonable request. Our network follows a tiered system, starting with a Transmission Control
+    zone, including an edge firewall and demilitarised zone. In the next layer, we keep our domain controller and
+    general business/IT operations in an IT zone. Following this, we have an IT/OT bridge which can be used to 
+    access a jumpbox in the OT zone. The jumpbox can access the OT devices on the network, however usually access 
+    would occur internally from the human-machine interface. Attached is a network diagram. 
+    
+    Good luck with your project! 
+    
+    Kind Regards,
+    
+    Robert White
+    Network assistant
+    OT Solutions"
+END MAIL

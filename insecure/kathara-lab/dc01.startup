@@ -6,12 +6,16 @@
 # NTDS.dit-style secrets dumping (T1003.003) with e.g. impacket secretsdump.
 
 apt-get update -qq
-apt-get install -y --no-install-recommends samba krb5-user winbind smbclient >/dev/null
+apt-get install -y --no-install-recommends samba krb5-user winbind smbclient samba-ad-provision samba-vfs-modules samba-dsdb-modules libpam-winbind libnss-winbind pamtester >/dev/null 
+#added modules: samba-dsdb-modules libpam-winbind libnss-winbind pamtester
 
-ip link set eth1 down
+echo "nameserver 10.10.10.10" > /etc/resolv.conf # so that setup using internet can be completed but samba recognises this domain
 
-ip addr add 10.10.10.10/24 dev eth0 2>/dev/null || true
+
+ip addr add 10.10.10.10/24 dev eth0 2>/dev/null
 hostname dc01
+
+rm /etc/samba/smb.conf # added
 
 if [ ! -f /var/lib/samba/private/sam.ldb ]; then
     samba-tool domain provision \
@@ -22,11 +26,28 @@ if [ ! -f /var/lib/samba/private/sam.ldb ]; then
         --adminpass='Summer2026!' \
         --use-rfc2307
 
-    samba-tool user create svc_backup 'Summer2026!' || true
-    samba-tool group addmembers "Domain Admins" svc_backup || true
+    #added the ability for dc01 to recognise samba users as physical users on the system. svc_backup is given root privileges, a huge vulnerability.
+
+    samba-tool user create --uid-number=0 --gid-number=0 svc_backup 'Summer2026!'
+    samba-tool group addmembers "Domain Admins" svc_backup
+
+    samba-tool user create ot_admin 'Ch@ngeMe2026' # added ot credentials
+    samba-tool group add "Operational Technology"
+    samba-tool group addmembers "Operational Technology" ot_admin
 fi
 
-nohup samba -i --no-process-group -s /usr/local/samba/etc/smb.conf \
-    > /var/log/samba.log 2>&1 &
+pam-auth-update # added to ensure that Debian users can be created from Samba users
 
-echo "[dc01] CORP.LOCAL DC up. Weak/reused cred: svc_backup / Summer2026! (Domain Admin)."
+cat sample_smb_conf.txt > /etc/samba/smb.conf # added as smb.conf does not specify template shell and homedir by default.
+
+
+#added home directory for svc_backup
+mkdir /home/svc_backup
+chown svc_backup /home/svc_backup
+chmod 700 /home/svc_backup
+
+nohup samba -i /var/log/samba.log 2>&1 &
+
+printf '%s\n' 'PermitRootLogin yes' > /etc/ssh/sshd_config.d/99-root-login.conf # added to allow lateral movement to svc_backup
+
+service ssh start

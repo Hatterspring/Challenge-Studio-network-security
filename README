@@ -1,5 +1,21 @@
-This is a network penetration testing project designed to reflect three major historical attack chains. It consists of a vulnerable network where all three attack chains can be replicated, and a secure network where the threat of all focused attack chains are diminished or completely mitigated. 
+This is a network penetration testing project designed to reflect upong Volt Typhoon's attack style. It consists of a vulnerable network where replicable attack chains can be replicated, and a secure network where the threat of all focused attack chains are diminished or completely mitigated. 
 
-PLEASE NOTE: The insecure network was originally developed by claude AI, the source files of which can be found in kathara-vulnerable-lab.zip. This network has been modified in order to: 
-    a) function and 
-    b) reflect my own personal touch.
+PLEASE NOTE: The insecure network was originally developed by Anthropic Claude Sonnet 5, the source files of which can be found in kathara-vulnerable-lab.zip. The network's hosts have been substantially modified. The network was AI-generated as the aim of this project is to investigate penetration testing techniques & mitigations, not necessarily from-scratch network development.
+
+There have been numerous challenges associated with this project. For instance, Volt Typhoon is most well known for its successful penetration of windows Active Directory Systems and the subsequent impacts. The equivalent system in a Kathara Debian Network is Samba, which has completely different tools and architecture.
+
+The replicated attack chain on the vulnerable system follows this sequence:
+
+- The attack commences with a buffer overflow attack resulting in a reverse shell sent to the attacker's host machine. 
+- Once initial access is gained, the shell is upgraded to allow job control. 
+- Then, vpn access credentials are gained from the firewall's log and domain controller credentials from an unsecured backup accessible from the admin's dashboard. 
+- The admin's machine is then laterally moved to using SSH (instead of Volt Typhoon's usual RDP, which is not possible in Kathara). 
+- From there, an unsecured Samba share with low-privileged access reveals the OT access credentials.
+- The domain controller can also be accessed from the admin directly by SSH (using the creds found on the web page)
+- The domain controller's smb.conf and samba/private files are compressed and moved through corpadmin, back to the firewall
+- The compressed files remain an indicator of compromise so are deleted when moved off a host.
+- The compressed files are sent to the attacker from the edge firewall via netcat
+- The attacker sets up an environment to perform offline cracking, determines the accounts stored in the domain controller and uses hashcat to brute-force a collision
+- Newly armed with OT credentials, the attacker moves laterally, back to the corpadmin host and then to the jumpbox through the it/ot bridge
+- From the jumpbox, the attacker is able to use information found in local logs and from the unsecured fileserver to access and modify operational technology assets.
+- This can be confirmed by accessing the human/machine interface. 

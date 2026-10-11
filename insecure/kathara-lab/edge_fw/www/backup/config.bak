@@ -1,0 +1,6 @@
+# appliance backup config - auto-generated, do not distribute
+vpn.local_admin=admin
+vpn.local_pass=admin123
+ad.domain=CORP.LOCAL
+ad.svc_account=CORP\\\\svc_backup
+ad.svc_password=Summer2026!
