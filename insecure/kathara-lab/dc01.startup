@@ -51,3 +51,5 @@ nohup samba -i /var/log/samba.log 2>&1 &
 printf '%s\n' 'PermitRootLogin yes' > /etc/ssh/sshd_config.d/99-root-login.conf # added to allow lateral movement to svc_backup
 
 service ssh start
+
+ip link set down eth1

@@ -7,6 +7,8 @@ ip addr add 10.0.0.1/24 dev eth1 # dmz-facing
 
 ip route add 10.10.10.0/24 via 10.0.0.10 dev eth1 #route into the it dmz edge
 
+ip link set down eth2
+
 #add logs that expose vpn password
 mkdir /var/log/vpn_logs 
 echo "8/10/2026 13:44:22 | connect | data: {user: corpadmin, pass: admin123} 

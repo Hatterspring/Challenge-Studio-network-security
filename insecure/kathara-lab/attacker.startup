@@ -9,4 +9,6 @@ apt-get install -y --no-install-recommends \
 
 ip addr add 172.16.0.10/24 dev eth0
 
+ip link set down eth1
+
 ip route add default via 172.16.0.1 #added routing, directly to the vulnerable network in this case

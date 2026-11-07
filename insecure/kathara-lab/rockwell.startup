@@ -2,7 +2,7 @@
 apt-get update -qq
 apt-get install -y --no-install-recommends python3 dropbear iproute2 >/dev/null
 
-ip link set eth2 down
+ip link set eth1 down
 
 ip addr add 10.30.30.12/24 dev eth0 # ot_lan
 
